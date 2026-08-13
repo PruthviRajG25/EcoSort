@@ -380,7 +380,7 @@ export default function EcoMap({
       )}
 
       {/* Leaflet CSS Inline Customizations */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .leaflet-container {
           background-color: transparent !important;
           font-family: inherit !important;
@@ -433,7 +433,7 @@ export default function EcoMap({
           border: 1px solid rgb(39 39 42) !important;
           color: white !important;
         }
-      `}</style>
+      ` }} />
     </div>
   );
 }
