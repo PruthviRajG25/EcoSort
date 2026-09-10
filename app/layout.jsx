@@ -6,6 +6,14 @@ export const metadata = {
   description: "Identify waste types instantly using artificial intelligence. Get actionable recycling instructions, locate local depots, and build green habits with EcoSort AI.",
   keywords: ["recycle", "waste management", "AI waste classifier", "eco-friendly", "sustainability", "go green"],
   authors: [{ name: "EcoSort AI Team" }],
+  icons: {
+    icon: [
+      { url: "/ecosort-logo.png" },
+      { url: "/icon.png" }
+    ],
+    shortcut: "/ecosort-logo.png",
+    apple: "/ecosort-logo.png",
+  },
 };
 
 export const viewport = {

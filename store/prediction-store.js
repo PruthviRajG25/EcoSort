@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { wasteService } from "@/services/waste.service";
 import { useUserStore } from "./user-store";
 
-export const usePredictionStore = create((set, get) => ({
+export const usePredictionStore = create((set) => ({
   history: [],
   isUploading: false,
   uploadProgress: 0,

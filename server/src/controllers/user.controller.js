@@ -57,13 +57,16 @@ export const deleteProfile = async (req, res, next) => {
     res.cookie("token", "", {
       expires: new Date(0),
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
+      path: "/",
     });
 
     res.cookie("ecosort_authenticated", "", {
       expires: new Date(0),
       sameSite: "lax",
+      path: "/",
     });
+
 
     res.status(200).json({
       success: true,

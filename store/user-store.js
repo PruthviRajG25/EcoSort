@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { authService } from "@/services/auth.service";
 import { userService } from "@/services/user.service";
 
-export const useUserStore = create((set, get) => ({
+export const useUserStore = create((set) => ({
   user: null, 
   stats: {
     totalScans: 0,

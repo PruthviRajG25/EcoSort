@@ -29,9 +29,10 @@ export const protect = async (req, _res, next) => {
     // 4. Attach authenticated user to request object
     req.user = currentUser;
     next();
-  } catch (error) {
+  } catch (_error) {
     next(new AppError("Invalid or expired authentication token. Please log in again.", 401));
   }
+
 };
 
 // Role authorization guard

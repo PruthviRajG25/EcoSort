@@ -42,7 +42,7 @@ const WastePredictionSchema = new mongoose.Schema(
     },
     modelName: {
       type: String,
-      default: "Gemini-1.5-Flash",
+      default: "Gemini-3.6-Flash",
     },
     modelVersion: {
       type: String,

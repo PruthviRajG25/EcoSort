@@ -89,7 +89,7 @@ describe("Waste API Endpoints", () => {
     jest.clearAllMocks();
     uploadSpy.mockImplementation((options, callback) => {
       return {
-        end: (buffer) => {
+        end: (_buffer) => {
           callback(null, {
             secure_url: "https://res.cloudinary.com/test/image/upload/sample.jpg",
             public_id: "ecosort/sample",
@@ -117,11 +117,12 @@ describe("Waste API Endpoints", () => {
       // Mock Cloudinary stream upload to invoke the callback with an error (real-world network fail)
       uploadSpy.mockImplementationOnce((options, callback) => {
         return {
-          end: (buffer) => {
+          end: (_buffer) => {
             callback(new Error("DNS lookup failed"), null);
           },
         };
       });
+
 
       const response = await request(app)
         .post("/api/waste/upload")

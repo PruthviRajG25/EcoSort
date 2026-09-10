@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, User, Settings, LogOut, Leaf, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, MapPin, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -18,9 +19,11 @@ export const Sidebar = () => {
   const menuItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Recycling Map", href: "/dashboard/map", icon: MapPin },
+    { name: "Community Quests", href: "/dashboard/community", icon: Trophy },
     { name: "My Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
+
 
   const handleLogout = () => {
     logout();
@@ -56,10 +59,16 @@ export const Sidebar = () => {
       </button>
 
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="h-16 flex items-center px-5 border-b border-zinc-100 dark:border-zinc-900">
         <Link href="/" className="flex items-center space-x-3 group">
-          <div className="bg-emerald-500 text-white p-2 rounded-lg group-hover:rotate-12 transition-transform duration-300 shadow-md shadow-emerald-500/20 shrink-0">
-            <Leaf className="h-5 w-5" />
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+            <Image
+              src="/ecosort-logo.png"
+              alt="EcoSort Logo"
+              width={32}
+              height={32}
+              className="object-contain w-full h-full"
+            />
           </div>
           {!isCollapsed && (
             <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
@@ -70,7 +79,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Menu Links */}
-      <nav className="flex-grow py-6 px-4 space-y-1">
+      <nav className="flex-grow py-6 px-3 space-y-1.5">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -79,20 +88,23 @@ export const Sidebar = () => {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                "flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group relative",
                 {
-                  "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400": isActive,
-                  "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50": !isActive,
+                  "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold shadow-sm border border-emerald-500/20": isActive,
+                  "text-zinc-600 hover:bg-zinc-100/70 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900/60 dark:hover:text-zinc-100 border border-transparent": !isActive,
                 }
               )}
             >
+              {isActive && (
+                <span className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r-full bg-emerald-500 shadow-sm" />
+              )}
               <Icon
-                className={cn("h-5 w-5 shrink-0 transition-transform group-hover:scale-110", {
+                className={cn("h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110", {
                   "text-emerald-600 dark:text-emerald-400": isActive,
-                  "text-zinc-400 group-hover:text-zinc-500 dark:text-zinc-500 dark:group-hover:text-zinc-400": !isActive,
+                  "text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-300": !isActive,
                 })}
               />
-              {!isCollapsed && <span>{item.name}</span>}
+              {!isCollapsed && <span className="tracking-tight">{item.name}</span>}
               {isCollapsed && (
                 <div className="absolute left-16 bg-zinc-900 text-white dark:bg-zinc-800 text-xs px-2.5 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-md z-50 border border-zinc-700">
                   {item.name}

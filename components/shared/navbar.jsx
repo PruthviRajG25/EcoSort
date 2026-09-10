@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Leaf, Menu, X, Sun, Moon, LogIn, LayoutDashboard } from "lucide-react";
+import { Menu, X, Sun, Moon, LogIn, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/store/user-store";
+import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,9 +49,16 @@ export const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 group">
-          <div className="bg-emerald-500 text-white p-1.5 rounded-lg group-hover:rotate-12 transition-transform duration-300 shadow-md shadow-emerald-500/20">
-            <Leaf className="h-5 w-5" />
+        <Link href="/" className="flex items-center space-x-2.5 group">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+            <Image
+              src="/ecosort-logo.png"
+              alt="EcoSort Logo"
+              width={32}
+              height={32}
+              className="object-contain w-full h-full"
+              priority
+            />
           </div>
           <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
             EcoSort <span className="text-zinc-900 dark:text-zinc-100">AI</span>
@@ -203,6 +212,5 @@ export const Navbar = () => {
   );
 };
 
-// Quick helper to bypass circular imports of cn
-import { cn } from "@/lib/utils";
 export default Navbar;
+

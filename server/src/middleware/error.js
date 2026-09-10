@@ -30,6 +30,7 @@ const sendErrorProd = (err, res) => {
   }
 };
 
+// eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, _req, res, _next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";

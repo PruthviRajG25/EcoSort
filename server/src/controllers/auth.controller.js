@@ -17,7 +17,8 @@ const createSendToken = (user, statusCode, res) => {
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 Hours
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
+    path: "/",
   };
 
   // Set the HTTP-Only JWT token cookie
@@ -27,7 +28,8 @@ const createSendToken = (user, statusCode, res) => {
   res.cookie("ecosort_authenticated", "true", {
     expires: cookieOptions.expires,
     secure: cookieOptions.secure,
-    sameSite: "lax", // Lax allows cookie checking during route navigation
+    sameSite: "lax",
+    path: "/",
   });
 
   // Remove password from response payload
@@ -37,9 +39,11 @@ const createSendToken = (user, statusCode, res) => {
     success: true,
     data: {
       user,
+      token,
     },
   });
 };
+
 
 // Register Controller
 export const register = async (req, res, next) => {
@@ -88,12 +92,14 @@ export const logout = (_req, res) => {
   res.cookie("token", "", {
     expires: new Date(0),
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
+    path: "/",
   });
   
   res.cookie("ecosort_authenticated", "", {
     expires: new Date(0),
     sameSite: "lax",
+    path: "/",
   });
 
   res.status(200).json({
@@ -101,6 +107,7 @@ export const logout = (_req, res) => {
     message: "Logged out successfully",
   });
 };
+
 
 // Get Current Logged In User details
 export const getMe = async (req, res) => {

@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Leaf, Send, Check } from "lucide-react";
+import Image from "next/image";
+import { Send, Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,9 +39,15 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Eco Brand Description */}
           <div className="md:col-span-1.5 space-y-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="bg-emerald-500 text-white p-1 rounded-md">
-                <Leaf className="h-4 w-4" />
+            <Link href="/" className="flex items-center space-x-2.5">
+              <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                <Image
+                  src="/ecosort-logo.png"
+                  alt="EcoSort Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain w-full h-full"
+                />
               </div>
               <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
                 EcoSort AI

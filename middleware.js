@@ -3,11 +3,14 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   
-  // Check for the mock authentication cookie
-  const isAuthenticated = request.cookies.has("ecosort_authenticated");
+  // Check for valid authentication cookies
+  const hasEcoCookie = request.cookies.get("ecosort_authenticated")?.value === "true";
+  const hasToken = Boolean(request.cookies.get("token")?.value);
+  const isAuthenticated = hasEcoCookie || hasToken;
 
   // Protected paths
   const protectedRoutes = ["/dashboard", "/profile", "/settings"];
+
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   // Auth pages (login, register) should not be visible to logged-in users

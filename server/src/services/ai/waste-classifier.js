@@ -40,12 +40,6 @@ export class WasteClassifier {
     }
 
     try {
-      // Initialize Gemini 1.5 Flash model
-      const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        generationConfig: { responseMimeType: "application/json" },
-      });
-
       // Prepare image parts for the API
       const imagePart = {
         inlineData: {
@@ -78,13 +72,36 @@ export class WasteClassifier {
         Output ONLY the raw JSON object. Do not wrap in markdown, backticks, or any other wrapper.
       `;
 
-      // Call the model with a 10s timeout safety check
-      const resultPromise = model.generateContent([prompt, imagePart]);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("AI Classification request timed out")), 10000)
-      );
+      // Try available modern Gemini models with fallback
+      const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"];
+      let result = null;
+      let lastErr = null;
 
-      const result = await Promise.race([resultPromise, timeoutPromise]);
+      for (const modelName of candidateModels) {
+        try {
+          const model = this.genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: { responseMimeType: "application/json" },
+          });
+
+          // Call the model with a 30s timeout safety check
+          const resultPromise = model.generateContent([prompt, imagePart]);
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Classification with ${modelName} timed out`)), 30000)
+          );
+
+          result = await Promise.race([resultPromise, timeoutPromise]);
+          if (result) break;
+        } catch (err) {
+          lastErr = err;
+          console.warn(`⚠️ Model ${modelName} failed (${err.message}), trying next candidate...`);
+        }
+      }
+
+      if (!result) {
+        throw lastErr || new Error("All Gemini models failed");
+      }
+
       let responseText = result.response.text().trim();
       
       // Safety clean: Remove markdown backticks block wrapping if the LLM outputted them
@@ -208,4 +225,6 @@ export class WasteClassifier {
   }
 }
 
-export default new WasteClassifier();
+const wasteClassifier = new WasteClassifier();
+export default wasteClassifier;
+

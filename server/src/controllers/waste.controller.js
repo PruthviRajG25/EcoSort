@@ -38,7 +38,7 @@ export const uploadWasteImage = async (req, res, next) => {
       const cloudinaryResult = await streamUpload(req.file.buffer);
       imageUrl = cloudinaryResult.secure_url;
       cloudinaryPublicId = cloudinaryResult.public_id;
-    } catch (uploadError) {
+    } catch (_uploadError) {
       console.warn("⚠️ Cloudinary upload failed (offline environment detected). Using local Base64 fallback!");
       const base64Data = req.file.buffer.toString("base64");
       imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
@@ -53,7 +53,7 @@ export const uploadWasteImage = async (req, res, next) => {
         req.file.mimetype,
         req.file.originalname
       );
-    } catch (aiError) {
+    } catch (_aiError) {
       // Fallback classification if service throws directly
       classification = {
         category: "Other",
@@ -61,6 +61,7 @@ export const uploadWasteImage = async (req, res, next) => {
         detectedObjects: ["Unidentified Waste"],
       };
     }
+
 
     // 3. Generate primary and alternative disposal suggestions
     const recommendation = await disposalDecisionEngine.getRecommendation(

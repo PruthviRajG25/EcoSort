@@ -29,16 +29,27 @@ export default function SettingsPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(profileSettingsSchema),
     defaultValues: {
-      name: user?.name || "Pruthvi Raj",
-      email: user?.email || "pruthvi.raj@ecosort.ai",
+      name: user?.name || "",
+      email: user?.email || "",
     },
   });
 
+  React.useEffect(() => {
+    if (user) {
+      reset({
+        name: user.name || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, reset]);
+
   const onSubmit = async (data) => {
+
     try {
       await updateProfile(data.name, data.email);
       setSuccess(true);

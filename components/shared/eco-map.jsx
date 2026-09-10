@@ -266,6 +266,8 @@ export default function EcoMap({
           
           return {
             instruction,
+            type: step.maneuver.type,
+            modifier: step.maneuver.modifier,
             distance: step.distance,
             duration: step.duration,
           };

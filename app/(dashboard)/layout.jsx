@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Menu, X, Sun, Moon, Leaf, Bell, LogOut, ChevronRight, LayoutDashboard, User, Settings, MapPin } from "lucide-react";
+import { Menu, X, Sun, Moon, Bell, LogOut, ChevronRight, LayoutDashboard, User, Settings, MapPin, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -41,9 +42,11 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Recycling Map", href: "/dashboard/map", icon: MapPin },
+    { name: "Community Quests", href: "/dashboard/community", icon: Trophy },
     { name: "My Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
+
 
   const getBreadcrumbs = () => {
     const paths = pathname.split("/").filter(Boolean);
@@ -67,8 +70,15 @@ export default function DashboardLayout({ children }) {
         <div className="flex flex-col items-center space-y-4">
           <div className="relative h-16 w-16">
             <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20" />
-            <div className="relative rounded-2xl bg-emerald-500 text-white p-3 shadow-lg shadow-emerald-500/20">
-              <Leaf className="h-8 w-8 animate-pulse" />
+            <div className="relative rounded-2xl bg-white dark:bg-zinc-900 border border-emerald-500/20 p-2.5 shadow-lg shadow-emerald-500/20 overflow-hidden">
+              <Image
+                src="/ecosort-logo.png"
+                alt="EcoSort"
+                width={48}
+                height={48}
+                className="object-contain animate-pulse"
+                priority
+              />
             </div>
           </div>
           <span className="text-zinc-600 dark:text-zinc-400 text-sm font-semibold tracking-wider animate-pulse">
@@ -145,9 +155,10 @@ export default function DashboardLayout({ children }) {
                 className="ring-2 ring-emerald-500/20"
               />
               <span className="hidden lg:inline text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                {user?.name.split(" ")[0]}
+                {user?.name ? user.name.split(" ")[0] : "Eco Member"}
               </span>
             </div>
+
           </div>
         </header>
 
@@ -183,9 +194,15 @@ export default function DashboardLayout({ children }) {
               <div>
                 {/* Header Brand */}
                 <div className="flex items-center justify-between pb-6 border-b border-zinc-100 dark:border-zinc-900">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-emerald-500 text-white p-1.5 rounded-lg">
-                      <Leaf className="h-5 w-5" />
+                  <div className="flex items-center space-x-2.5">
+                    <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                      <Image
+                        src="/ecosort-logo.png"
+                        alt="EcoSort"
+                        width={32}
+                        height={32}
+                        className="object-contain w-full h-full"
+                      />
                     </div>
                     <span className="font-extrabold text-lg bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">
                       EcoSort AI
@@ -202,7 +219,7 @@ export default function DashboardLayout({ children }) {
                 </div>
 
                 {/* Drawer Links */}
-                <nav className="py-8 flex flex-col space-y-2">
+                <nav className="py-6 flex flex-col space-y-1.5">
                   {menuItems.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -212,14 +229,17 @@ export default function DashboardLayout({ children }) {
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
-                          "flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                          "flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all relative",
                           {
-                            "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400": isActive,
-                            "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50": !isActive,
+                            "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold border border-emerald-500/20 shadow-sm": isActive,
+                            "text-zinc-600 hover:bg-zinc-100/70 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900/60 dark:hover:text-zinc-100 border border-transparent": !isActive,
                           }
                         )}
                       >
-                        <Icon className="h-5 w-5" />
+                        {isActive && (
+                          <span className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r-full bg-emerald-500 shadow-sm" />
+                        )}
+                        <Icon className={cn("h-5 w-5", isActive ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400")} />
                         <span>{item.name}</span>
                       </Link>
                     );

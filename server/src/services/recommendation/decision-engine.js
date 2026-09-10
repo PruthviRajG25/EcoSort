@@ -240,8 +240,9 @@ export class DisposalDecisionEngine {
    * while keeping the primary action DETERMINED strictly by local code rules.
    */
   async enrichExplanationsWithLLM(category, detectedObjects, condition, primaryAction) {
+    if (!this.genAI) return this.fallbackReasoning(category, primaryAction);
     const itemName = detectedObjects.join(", ") || category;
-    const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"];
 
     const prompt = `
       You are an eco-friendly waste management advisor.
@@ -262,13 +263,28 @@ export class DisposalDecisionEngine {
       Ensure your suggestions are realistic and focus on carbon reduction. Do not add markdown backticks.
     `;
 
-    const result = await model.generateContent(prompt);
-    let text = result.response.text().trim();
-    if (text.startsWith("```")) {
-      text = text.replace(/^```(json)?/, "").replace(/```$/, "").trim();
+    for (const modelName of candidateModels) {
+      try {
+        const model = this.genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: "application/json" },
+        });
+
+        const result = await model.generateContent(prompt);
+        let text = result.response.text().trim();
+        if (text.startsWith("```")) {
+          text = text.replace(/^```(json)?/, "").replace(/```$/, "").trim();
+        }
+        return JSON.parse(text);
+      } catch (err) {
+        console.warn(`⚠️ Decision Engine Gemini model ${modelName} failed (${err.message}), trying next candidate...`);
+      }
     }
-    return JSON.parse(text);
+
+    return this.fallbackReasoning(category, primaryAction);
   }
 }
 
-export default new DisposalDecisionEngine();
+const disposalDecisionEngine = new DisposalDecisionEngine();
+export default disposalDecisionEngine;
+

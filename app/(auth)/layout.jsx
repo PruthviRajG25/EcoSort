@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Leaf, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AuthLayout({ children }) {
@@ -16,11 +17,17 @@ export default function AuthLayout({ children }) {
         <div className="absolute top-24 -right-12 w-64 h-64 bg-teal-500/20 rounded-full blur-2xl" />
 
         <div className="relative z-10">
-          <Link href="/" className="flex items-center space-x-2 w-fit">
-            <div className="bg-white/10 backdrop-blur-md text-white p-2 rounded-xl border border-white/20">
-              <Leaf className="h-6 w-6" />
+          <Link href="/" className="flex items-center space-x-3 w-fit group">
+            <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-xl border border-white/30 shadow-md">
+              <Image
+                src="/ecosort-logo.png"
+                alt="EcoSort"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight">EcoSort AI</span>
+            <span className="font-extrabold text-2xl tracking-tight text-white">EcoSort AI</span>
           </Link>
         </div>
 

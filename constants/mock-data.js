@@ -1,7 +1,7 @@
 export const MOCK_USER = {
   id: "usr-101",
-  name: "Pruthvi Raj",
-  email: "pruthvi.raj@ecosort.ai",
+  name: "John",
+  email: "John@ecosort.ai",
   avatarUrl: "", // Fallback will trigger nice gradient avatar
   ecoPoints: 1250,
   ecoLevel: "Eco Sentinel",
