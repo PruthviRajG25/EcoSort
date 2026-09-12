@@ -149,6 +149,7 @@ export default function BarcodeScannerModal({ isOpen, onClose }) {
   const [detectedProduct, setDetectedProduct] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [analyzedSuccess, setAnalyzedSuccess] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
