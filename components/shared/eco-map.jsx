@@ -110,7 +110,14 @@ export default function EcoMap({
     } else {
       userMarkerRef.current = L.marker(startCoords, { icon: userIcon })
         .addTo(map)
-        .bindPopup("<div class='font-bold text-xs text-zinc-950'>Your Location</div>");
+        .bindPopup("<div class='font-bold text-xs text-zinc-950'>📍 Your Exact Location</div>");
+    }
+
+    // Dynamically smooth fly map view to user's exact location
+    try {
+      map.flyTo(startCoords, 14, { animate: true, duration: 1.0 });
+    } catch {
+      map.setView(startCoords, 14);
     }
   }, [leafletLoaded, startCoords]);
 

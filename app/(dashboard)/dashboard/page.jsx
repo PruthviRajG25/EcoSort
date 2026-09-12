@@ -27,7 +27,8 @@ import {
   Eye,
   ShieldCheck,
   Layers,
-  Scissors
+  Scissors,
+  ScanBarcode
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -39,6 +40,7 @@ import { usePredictionStore } from "@/store/prediction-store";
 import { SCRAP_RATES } from "@/constants/mock-data";
 import Link from "next/link";
 import LiveCamera from "@/components/dashboard/live-camera";
+import BarcodeScannerModal from "@/components/dashboard/barcode-scanner-modal";
 import EcoCraftIdeas from "@/components/dashboard/ecocraft-ideas";
 import DecompositionSimulator from "@/components/dashboard/decomposition-simulator";
 import ScrapPickupModal from "@/components/dashboard/scrap-pickup-modal";
@@ -82,6 +84,7 @@ export default function DashboardPage() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [showPickupModal, setShowPickupModal] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [showWhyExpanded, setShowWhyExpanded] = useState(true);
   const [showDiyStudio, setShowDiyStudio] = useState(false);
 
@@ -344,15 +347,24 @@ export default function DashboardPage() {
                             e.stopPropagation();
                             setShowCamera(true);
                           }}
-                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-6 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02]"
+                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-5 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02]"
                         >
                           <Camera className="h-4 w-4" />
                           <span>Scan with Camera</span>
                         </Button>
 
-                        <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider hidden sm:inline">
-                          or
-                        </span>
+                        {/* Barcode Scanner (New Feature) */}
+                        <Button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowBarcodeScanner(true);
+                          }}
+                          className="w-full sm:w-auto bg-teal-600 hover:bg-teal-500 text-white font-bold h-11 px-5 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 transition-all hover:scale-[1.02]"
+                        >
+                          <ScanBarcode className="h-4 w-4" />
+                          <span>Barcode Scanner</span>
+                        </Button>
 
                         {/* Upload Image (Secondary CTA) */}
                         <Button
@@ -362,9 +374,9 @@ export default function DashboardPage() {
                             e.stopPropagation();
                             triggerFileSelect();
                           }}
-                          className="w-full sm:w-auto font-bold h-11 px-6 rounded-xl border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                          className="w-full sm:w-auto font-bold h-11 px-5 rounded-xl border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                         >
-                          <Upload className="h-4 w-4 text-zinc-500 mr-2" />
+                          <Upload className="h-4 w-4 text-zinc-500 mr-1.5" />
                           <span>Upload Image</span>
                         </Button>
                       </div>
@@ -1234,6 +1246,12 @@ export default function DashboardPage() {
       <ScrapPickupModal
         isOpen={showPickupModal}
         onClose={() => setShowPickupModal(false)}
+      />
+
+      {/* Barcode & EPR Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={showBarcodeScanner}
+        onClose={() => setShowBarcodeScanner(false)}
       />
     </div>
   );

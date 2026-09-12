@@ -50,13 +50,13 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2.5 group">
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+          <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-white shadow-sm ring-1 ring-emerald-500/30 dark:ring-emerald-400/50 p-1 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
             <Image
               src="/ecosort-logo.png"
               alt="EcoSort Logo"
-              width={32}
-              height={32}
-              className="object-contain w-full h-full"
+              width={36}
+              height={36}
+              className="object-contain w-full h-full [image-rendering:crisp-edges]"
               priority
             />
           </div>

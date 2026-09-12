@@ -28,13 +28,12 @@ import {
   Phone,
 } from "lucide-react";
 import EcoMap from "@/components/shared/eco-map";
-import { api } from "@/lib/api";
-import { MOCK_CENTERS } from "@/constants/mock-data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLocationStore, CITIES_DATA } from "@/store/location-store";
 
 // Helper function to return intuitive maneuver icons for route steps
 function getManeuverIcon(step) {
@@ -71,9 +70,6 @@ export default function RecyclingMapPage() {
   const [startCoords, setStartCoords] = useState(null); // [lat, lon]
   const [startQuery, setStartQuery] = useState("");
   const [startLocationName, setStartLocationName] = useState("Not Selected (Choose location or grant GPS)");
-  const [gpsAccessGranted, setGpsAccessGranted] = useState(false);
-  const [gpsLoading, setGpsLoading] = useState(false);
-  const [gpsError, setGpsError] = useState("");
   const [travelMode, setTravelMode] = useState("driving"); // driving, bicycle, walking
   
   // Geocoder predictions state
@@ -96,81 +92,45 @@ export default function RecyclingMapPage() {
     return `https://www.google.com/maps/dir/?api=1&destination=${selectedCenter.latitude},${selectedCenter.longitude}&travelmode=${modeParam}`;
   };
 
-  // 1. Fetch centers from API on mount
+  const {
+    selectedCityKey,
+    userExactCoords,
+    userLocationName,
+    isGpsActive,
+    gpsLoading: storeGpsLoading,
+    setCity,
+    detectExactLocation,
+    getActiveCity,
+    getDynamicCenters
+  } = useLocationStore();
+
+  // Load centers dynamically based on active city or user's exact GPS location
   useEffect(() => {
-    const loadCenters = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get("/waste/centers");
-        if (response.success && response.data && response.data.length > 0) {
-          const formatted = response.data.map((c) => ({
-            id: c._id || c.id,
-            name: c.name,
-            address: c.address,
-            latitude: c.latitude,
-            longitude: c.longitude,
-            contact: c.contact,
-            phone: c.contact,
-            website: c.website || "#",
-            acceptedMaterials: c.categories || [],
-            rates: c.rates || {},
-            distanceKm: (1.2 + Math.random() * 4).toFixed(1),
-          }));
-          setCentersList(formatted);
-          setSelectedCenter(formatted[0]);
-        } else {
-          setCentersList(MOCK_CENTERS);
-          setSelectedCenter(MOCK_CENTERS[0]);
-        }
-      } catch (err) {
-        console.error("Failed to load database centers, using mocks:", err.message);
-        setCentersList(MOCK_CENTERS);
-        setSelectedCenter(MOCK_CENTERS[0]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCenters();
-  }, []);
-
-  // 2. Request browser Geolocation API
-  const requestLocation = () => {
-    if (!navigator.geolocation) {
-      setGpsError("Geolocation is not supported by your browser.");
-      return;
+    const dynamicCenters = getDynamicCenters();
+    setCentersList(dynamicCenters);
+    if (dynamicCenters.length > 0) {
+      setSelectedCenter(dynamicCenters[0]);
     }
+    const currentCity = getActiveCity();
+    const effectiveCoords = userExactCoords || currentCity.coords;
+    setStartCoords(effectiveCoords);
+    setStartLocationName(userLocationName || `${currentCity.name}, ${currentCity.state}`);
+    setStartQuery(userLocationName || `${currentCity.name}, ${currentCity.state}`);
+    setGpsAccessGranted(isGpsActive);
+    setLoading(false);
+  }, [selectedCityKey, userExactCoords, isGpsActive, userLocationName, getActiveCity, getDynamicCenters]);
 
-    setGpsLoading(true);
-    setGpsError("");
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        setStartCoords([lat, lon]);
-        setStartLocationName("My Current GPS Location");
-        setStartQuery("My Current GPS Location");
-        setGpsAccessGranted(true);
-        setGpsLoading(false);
-      },
-      (error) => {
-        console.warn("GPS access denied, defaulting to Bangalore center:", error.message);
-        setGpsError("Permission denied. Set start manually or type below.");
-        setGpsAccessGranted(false);
-        setGpsLoading(false);
-        // Default to Bangalore center coordinates as fallback
-        setStartCoords([12.9719, 77.5937]);
-        setStartLocationName("Bangalore Center (GPS Denied)");
-        setStartQuery("Bangalore Center");
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+  // Request browser Geolocation API
+  const requestLocation = () => {
+    detectExactLocation();
   };
 
-  // Auto request location on load
+  // Auto detect location on initial mount if supported
   useEffect(() => {
-    requestLocation();
-  }, []);
+    if (!userExactCoords) {
+      detectExactLocation();
+    }
+  }, [userExactCoords, detectExactLocation]);
 
   // 3. Autocomplete Search for Start Location via Nominatim API
   useEffect(() => {
@@ -255,32 +215,57 @@ export default function RecyclingMapPage() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
+          <div className="flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+            <MapPin className="h-3.5 w-3.5" />
+            <span>Active City: {getActiveCity().name}, {getActiveCity().state}</span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-            📍 interactive Navigation & Scrap Depots
+            📍 Interactive Navigation & Scrap Depots
           </h1>
           <p className="text-sm text-muted-foreground">
             Plan your route, check transport duration/distance, and check real-time scrap purchase rates.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {gpsAccessGranted ? (
-            <Badge className="bg-emerald-500 text-white font-bold text-xs py-1 px-2.5 rounded-full border-0">
-              ● Live GPS Connected
+
+        {/* City & GPS Controls */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* City Selector */}
+          <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs shadow-xs">
+            <Building2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+            <span className="text-zinc-500 font-semibold">City:</span>
+            <select
+              value={selectedCityKey}
+              onChange={(e) => setCity(e.target.value)}
+              className="bg-transparent font-bold text-zinc-900 dark:text-zinc-100 focus:outline-none cursor-pointer"
+            >
+              {Object.entries(CITIES_DATA).map(([key, city]) => (
+                <option key={key} value={key} className="dark:bg-zinc-900">
+                  {city.name} ({city.state})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* GPS Button */}
+          {isGpsActive ? (
+            <Badge className="bg-emerald-500 text-white font-bold text-xs py-1.5 px-3 rounded-xl border-0 shadow-xs flex items-center space-x-1.5">
+              <span className="h-2 w-2 rounded-full bg-white animate-ping" />
+              <span>Exact GPS Connected</span>
             </Badge>
           ) : (
             <Button
               onClick={requestLocation}
-              disabled={gpsLoading}
+              disabled={storeGpsLoading}
               variant="outline"
               size="sm"
-              className="text-xs h-9 border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold"
+              className="text-xs h-9 px-3.5 border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             >
-              {gpsLoading ? (
-                <div className="h-3 w-3 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin mr-1.5" />
+              {storeGpsLoading ? (
+                <div className="h-3.5 w-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mr-1.5" />
               ) : (
-                <Locate className="h-3.5 w-3.5 mr-1.5 text-zinc-400" />
+                <Locate className="h-3.5 w-3.5 mr-1.5 text-emerald-500" />
               )}
-              {gpsLoading ? "Connecting GPS..." : "Grant GPS Location"}
+              {storeGpsLoading ? "Detecting GPS..." : "Detect My Location"}
             </Button>
           )}
         </div>

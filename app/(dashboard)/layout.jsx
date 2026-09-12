@@ -195,13 +195,13 @@ export default function DashboardLayout({ children }) {
                 {/* Header Brand */}
                 <div className="flex items-center justify-between pb-6 border-b border-zinc-100 dark:border-zinc-900">
                   <div className="flex items-center space-x-2.5">
-                    <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                    <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-white shadow-sm ring-1 ring-emerald-500/30 dark:ring-emerald-400/50 p-1 flex items-center justify-center">
                       <Image
                         src="/ecosort-logo.png"
                         alt="EcoSort"
-                        width={32}
-                        height={32}
-                        className="object-contain w-full h-full"
+                        width={36}
+                        height={36}
+                        className="object-contain w-full h-full [image-rendering:crisp-edges]"
                       />
                     </div>
                     <span className="font-extrabold text-lg bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">

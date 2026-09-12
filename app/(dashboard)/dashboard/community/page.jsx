@@ -29,6 +29,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useUserStore } from "@/store/user-store";
+import { useLocationStore, CITIES_DATA } from "@/store/location-store";
 import { soundManager } from "@/lib/audio";
 import { cn } from "@/lib/utils";
 
@@ -132,6 +133,18 @@ const INITIAL_REVIEWS = [
 
 export default function CommunityPage() {
   const { user, stats, addPoints } = useUserStore();
+  const {
+    selectedCityKey,
+    userLocationName,
+    isGpsActive,
+    setCity,
+    detectExactLocation,
+    getActiveCity
+  } = useLocationStore();
+
+  const activeCity = getActiveCity();
+  const currentQuests = activeCity.quests || INITIAL_QUESTS;
+  const currentLeaderboard = activeCity.leaderboard || BASE_LEADERBOARD;
 
   // Sound effects state (defaults to OFF, persists in localStorage)
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -207,14 +220,15 @@ export default function CommunityPage() {
 
   // Compute dynamic leaderboard rows reflecting user's live points
   const dynamicLeaderboard = useMemo(() => {
-    const list = BASE_LEADERBOARD.map((entry) => {
+    const list = currentLeaderboard.map((entry) => {
       if (entry.isUser) {
         return {
           ...entry,
           name: user?.name || "You",
           points: userPoints,
           scans: userScans,
-          badge: rankInfo.currentRank
+          badge: rankInfo.currentRank,
+          locality: userLocationName ? userLocationName.split(",")[0] : activeCity.wards[0]
         };
       }
       return entry;
@@ -236,8 +250,9 @@ export default function CommunityPage() {
     adjustedList.sort((a, b) => b.points - a.points);
 
     // Apply locality filter
+    const primaryWard = activeCity.wards[0] || "Downtown";
     const filtered = localityFilter === "ward"
-      ? adjustedList.filter((item) => item.isUser || item.locality === "Indiranagar")
+      ? adjustedList.filter((item) => item.isUser || item.ward === primaryWard || item.locality === primaryWard)
       : adjustedList;
 
     // Assign final rank numbers
@@ -245,7 +260,7 @@ export default function CommunityPage() {
       ...item,
       computedRank: index + 1
     }));
-  }, [user?.name, userPoints, userScans, rankInfo.currentRank, localityFilter, timeframeFilter]);
+  }, [currentLeaderboard, user?.name, userPoints, userScans, rankInfo.currentRank, activeCity.wards, userLocationName, localityFilter, timeframeFilter]);
 
   // User's current rank entry and adjacent comparison
   const userRankEntry = useMemo(() => {
@@ -262,7 +277,7 @@ export default function CommunityPage() {
   }, [dynamicLeaderboard]);
 
   // Featured / Recommended Challenge (Highest reward)
-  const featuredQuest = INITIAL_QUESTS.find((q) => q.id === "q-2") || INITIAL_QUESTS[0];
+  const featuredQuest = currentQuests.find((q) => q.rewardPoints >= 500) || currentQuests[0];
 
   // Join quest handler
   const handleJoinQuest = (quest) => {
@@ -364,22 +379,51 @@ export default function CommunityPage() {
           ================================================== */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800/80 pb-6">
         <div>
-          <div className="flex items-center space-x-2.5 mb-2">
+          <div className="flex flex-wrap items-center gap-2.5 mb-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               Community challenges are active
             </span>
-            <span className="hidden sm:inline text-xs text-zinc-400">• Greater Bengaluru</span>
+
+            {/* City Selector */}
+            <div className="inline-flex items-center space-x-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full px-2.5 py-0.5 text-xs shadow-2xs">
+              <span className="text-zinc-400">📍</span>
+              <span className="text-zinc-500 font-medium">City:</span>
+              <select
+                value={selectedCityKey}
+                onChange={(e) => setCity(e.target.value)}
+                className="bg-transparent font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none cursor-pointer"
+              >
+                {Object.entries(CITIES_DATA).map(([key, c]) => (
+                  <option key={key} value={key} className="dark:bg-zinc-900">
+                    {c.name} ({c.state})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {isGpsActive ? (
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                <span>●</span> GPS: {userLocationName}
+              </span>
+            ) : (
+              <button
+                onClick={detectExactLocation}
+                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
+              >
+                🎯 Detect My GPS City
+              </button>
+            )}
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-white shadow-md ring-1 ring-emerald-500/30 dark:ring-emerald-400/50 p-1 flex items-center justify-center">
               <Image
                 src="/ecosort-logo.png"
                 alt="EcoSort Community"
-                width={32}
-                height={32}
-                className="object-contain w-full h-full"
+                width={40}
+                height={40}
+                className="object-contain w-full h-full [image-rendering:crisp-edges]"
                 priority
               />
             </div>
@@ -388,7 +432,7 @@ export default function CommunityPage() {
             </h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl">
-            Join local recycling challenges, make an impact, and climb the community leaderboard.
+            Join local recycling challenges in {activeCity.name}, make an impact, and climb the community leaderboard.
           </p>
         </div>
 
@@ -696,12 +740,12 @@ export default function CommunityPage() {
               <span>Active Community Quests</span>
             </h2>
             <Badge variant="outline" className="text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 text-xs font-semibold">
-              3 Live Sprints
+              {currentQuests.length} Live Sprints
             </Badge>
           </div>
 
           <div className="space-y-4">
-            {INITIAL_QUESTS.map((quest) => {
+            {currentQuests.map((quest) => {
               const percent = Math.round((quest.currentScans / quest.targetScans) * 100);
               const isJoined = joinedQuests[quest.id];
 
@@ -900,7 +944,7 @@ export default function CommunityPage() {
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                   )}
                 >
-                  All Bengaluru
+                  All {activeCity.name}
                 </button>
                 <button
                   onClick={() => {
@@ -914,7 +958,7 @@ export default function CommunityPage() {
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                   )}
                 >
-                  My Ward
+                  My Ward ({activeCity.wards[0] || "Local"})
                 </button>
               </div>
 

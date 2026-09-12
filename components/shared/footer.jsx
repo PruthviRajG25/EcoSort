@@ -40,13 +40,13 @@ export const Footer = () => {
           {/* Eco Brand Description */}
           <div className="md:col-span-1.5 space-y-4">
             <Link href="/" className="flex items-center space-x-2.5">
-              <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 bg-white shadow-sm ring-1 ring-emerald-500/30 dark:ring-emerald-400/50 p-1 flex items-center justify-center">
                 <Image
                   src="/ecosort-logo.png"
                   alt="EcoSort Logo"
-                  width={32}
-                  height={32}
-                  className="object-contain w-full h-full"
+                  width={36}
+                  height={36}
+                  className="object-contain w-full h-full [image-rendering:crisp-edges]"
                 />
               </div>
               <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-400">

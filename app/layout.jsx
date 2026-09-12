@@ -8,8 +8,7 @@ export const metadata = {
   authors: [{ name: "EcoSort AI Team" }],
   icons: {
     icon: [
-      { url: "/ecosort-logo.png" },
-      { url: "/icon.png" }
+      { url: "/ecosort-logo.png" }
     ],
     shortcut: "/ecosort-logo.png",
     apple: "/ecosort-logo.png",
