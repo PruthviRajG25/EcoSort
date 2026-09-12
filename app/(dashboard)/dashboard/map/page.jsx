@@ -116,7 +116,6 @@ export default function RecyclingMapPage() {
     setStartCoords(effectiveCoords);
     setStartLocationName(userLocationName || `${currentCity.name}, ${currentCity.state}`);
     setStartQuery(userLocationName || `${currentCity.name}, ${currentCity.state}`);
-    setGpsAccessGranted(isGpsActive);
     setLoading(false);
   }, [selectedCityKey, userExactCoords, isGpsActive, userLocationName, getActiveCity, getDynamicCenters]);
 
