@@ -98,6 +98,7 @@ export default function RecyclingMapPage() {
     userLocationName,
     isGpsActive,
     gpsLoading: storeGpsLoading,
+    gpsError,
     setCity,
     detectExactLocation,
     getActiveCity,
