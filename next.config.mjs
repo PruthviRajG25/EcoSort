@@ -7,10 +7,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname),
   async rewrites() {
+    const backendUrl = process.env.BACKEND_API_URL || "http://127.0.0.1:5050";
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:5050/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
